@@ -1,15 +1,19 @@
 <script setup lang="ts">
 //import HelloWorld from './components/HelloWorld.vue'
 //@ts-ignore
-import mainWindow from './components/mainWindow.vue';
 import tipPage from './components/tipPage.vue';
+import mainWindow from './components/mainWindow.vue';
+import iaTest from './components/iaTest.vue';
+import iaTest2 from './components/iaTest2.vue';
 
 </script>
 
 <template>
-
   <!-- <HelloWorld msg="Vite + Vue" /> -->
+  <!----<mainWindow/>-->
   <tipPage/>
+
+  <iaTest2/>
 </template>
 
 <style scoped>

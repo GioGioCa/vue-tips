@@ -1,0 +1,26 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .btn {
+      @apply py-1 px-2 m-1 rounded-md font-times text-sm;  /* Botón con padding, margin, borde redondeado y fuente Times */
+    }
+      /* Si deseas un estilo más específico, como color de fondo y texto */
+    .btn-primary {
+        @apply bg-blue-500 text-white hover:bg-blue-600;
+    }
+
+    .btn-secondary {
+        @apply bg-gray-500 text-white hover:bg-gray-600;
+    }
+    }
+:root {
+    --orange-light: #ffe8d6;
+    --black: #000000;
+    --off-white: #f8f9fa;
+}
+:body{
+    bg-black
+}

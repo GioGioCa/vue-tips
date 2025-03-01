@@ -17,6 +17,9 @@ const vuetify = createVuetify({
                     secondary: "#424242", // Gris oscuro para contrastes
                     error: "#FF5252",
                     success: "#4CAF50",
+                    customPink: "#f7c1bd",
+                    customOrange: "#f37c74",
+                    customOrangeSideBar: "#ed6959",
                 },
             },
         },
