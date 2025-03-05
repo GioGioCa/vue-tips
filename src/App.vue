@@ -12,8 +12,6 @@ import iaTest2 from './components/iaTest2.vue';
   <!-- <HelloWorld msg="Vite + Vue" /> -->
   <!----<mainWindow/>-->
   <tipPage/>
-
-  <iaTest2/>
 </template>
 
 <style scoped>

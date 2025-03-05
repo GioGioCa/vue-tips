@@ -39,7 +39,7 @@
                     <v-col cols="8">
                         <h1 readonly>{{
                             confirmedValueMoney
-                        }}</h1>
+                            }}</h1>
                     </v-col>
                     <v-col cols="4" class="text-center">
                         <v-btn color="blue" @click="toggleEdit">
@@ -91,44 +91,55 @@
                 </v-container>
             </v-col>
 
+
             <v-col cols="4" class="bg-blue lighten-2">Columna 3
                 <h2>Lista de Pagos</h2>
                 <ul>
-                    <li v-for="(payment, index) in tip" :key="index" class="border p-2 rounded my-1">
+                    <li v-for="payment in items" :key="payment.id" class="border p-2 rounded my-1">
                         💰 <strong>${{ payment.valueMoney }}</strong> -
                         🏦 {{ payment.paymentMethod }}
-                        (Dividido: ${{ payment.splitAmount }})
+                        (Dividido: ${{ payment.splitAmount }}, Personas: {{ payment.peopleAmount }})
                     </li>
                 </ul>
             </v-col>
         </v-row>
     </v-container>
+    <v-col cols="4" class="bg-blue lighten-2">Columna 3
+        <h2>Lista de Pagos</h2>
+        <ul>
+            <li v-for="(payment, index) in tip" :key="index" class="border p-2 rounded my-1">
+                💰 <strong>${{ payment.valueMoney }}</strong> -
+                🏦 {{ payment.paymentMethod }}
+                (Dividido: ${{ payment.splitAmount }})
+            </li>
+        </ul>
+    </v-col>
 
     <v-col>
         <h3>Total Pagado</h3>
-        //Mostrar lista de pagos efectuados
-        <ul>
-            <li v-for="(payment, index) in tip" :key="index">
-                {{ payment.paymentMethod }}: ${{ payment.valueMoney }}
-            </li>
-        </ul>
+
         <v-btn @click="addPayment" class="pay-button" color="orange">
             Pagar
         </v-btn>
     </v-col>
+    <v-col cols="4" class="bg-blue lighten-2">Columna 3
+        <h2>Lista de Pagos</h2>
+        <ul>
+            <li v-for="(payment, index) in tip" :key="index" class="border p-2 rounded my-1">
+                💰 <strong>${{ payment.valueMoney }}</strong> -
+                🏦 {{ payment.paymentMethod }}
+                (Dividido: ${{ payment.splitAmount }})
+            </li>
+        </ul>
+    </v-col>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed, watch, onMounted } from "vue";
 import "../assets/styles/tailwind.css";
+import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from "../firebaseConfig";
 
-
-// interface Tip{
-//     value: number
-//    description: string
-//}
-// Definir el array de teclas como una referencia reactiva
-const keys = ref(["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0", "✔"]);
 const buttonLayout = ref([
     "1",
     "2",
@@ -148,23 +159,17 @@ const isEditing = ref(false); // Estado para bloquear/desbloquear edición
 const toggleEdit = () => {
     isEditing.value = !isEditing.value;
     if (!isEditing.value) {
-        inputText.value = ""; // Limpia el input si se cancela la edición
+        inputText.value = "";
     }
 };
-// Función para manejar los clics
 
-const paymentMethod = ref("cash");
 const options = [
     { value: "cash", label: "CASH" },
     { value: "cardBBVA", label: "BBVA 1234" },
     { value: "cardSANTANDER", label: "SANTANDER 1234" },
 ];
-//const tipTotalAmount = computed(() => Tips.value)
 const totalAmount = ref(5500);
-const tempValue = ref(0);
 const confirmedValueMoney = ref(0); // Almacena el valor confirmado
-const confirmedAmount = ref(0);
-//const parsedAmount = parseFloat(totalAmount).toFixed(2);
 const tip = ref<
     { valueMoney: number; paymentMethod: string; splitAmount: number }[]
 >([
@@ -179,12 +184,36 @@ const newTip = reactive({
 
 // Cálculo del monto por persona
 const amountPerPerson = computed(() => newTip.peopleAmount > 0 ? (confirmedValueMoney.value / newTip.peopleAmount).toFixed(2) : "0");
+interface PaymentTips {
+    valueMoney: number;
+    paymentMethod: string;
+    splitAmount: number;
+    peopleAmount: number;
+    id?: string;
+}
 
+// Define el tipo del array correctamente
+const items = ref<PaymentTips[]>([]);
+// Obtener datos de Firestore
 
-// Función para agregar pago
-import { db } from "../firebaseConfig";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+const getItems = async () => {
+    items.value = [];
+    const querySnapshot = await getDocs(collection(db, 'tips_payments'));
+    querySnapshot.forEach((doc) => {
+        const data = doc.data() as PaymentTips; // Asegúrate de tipar correctamente
+        items.value.push({
+            valueMoney: data.valueMoney,
+            paymentMethod: data.paymentMethod,
+            splitAmount: data.splitAmount,
+            peopleAmount: data.peopleAmount,
+            id: doc.id,
+        });
+    });
+};
 
+onMounted(() => {
+    getItems();
+});
 const addPaymentToFirestore = async (payment: {
     valueMoney: number;
     paymentMethod: string;
@@ -192,13 +221,14 @@ const addPaymentToFirestore = async (payment: {
     peopleAmount: number;
 }) => {
     try {
-        await addDoc(collection(db, "payments"), {
+        await addDoc(collection(db, "tips_payments"), {
             valueMoney: payment.valueMoney,
             paymentMethod: payment.paymentMethod,
             splitAmount: payment.splitAmount,
             peopleAmount: payment.peopleAmount,
             createdAt: serverTimestamp()
         });
+        window.location.reload(); // Recarga para ver los cambios
         console.log("Pago guardado en Firestore");
     } catch (error) {
         console.error("Error al guardar el pago:", error);
@@ -207,35 +237,44 @@ const addPaymentToFirestore = async (payment: {
 
 
 // Llamar la función cuando se haga un pago
-const addPayment = () => {
+const addPayment = async () => {
     console.log("Intentando agregar pago...");
-    console.log("Valor confirmado:", confirmedValueMoney.value);
-    console.log("Método de pago:", newTip.paymentMethod);
-    console.log("Personas:", newTip.peopleAmount);
-
     if (confirmedValueMoney.value > 0 && newTip.paymentMethod && newTip.peopleAmount) {
         const payment = {
             valueMoney: confirmedValueMoney.value,
             paymentMethod: newTip.paymentMethod,
-            splitAmount: amountPerPerson.value,
+            splitAmount: Number(amountPerPerson.value),
             peopleAmount: newTip.peopleAmount
         };
-        // Agregar el pago a la lista localmente
-        tip.value.push({
-            valueMoney: payment.valueMoney,
-            paymentMethod: payment.paymentMethod,
-            splitAmount: Number(payment.splitAmount) // Convert string to number
-        });
 
-        // Actualizar el total si es pago en efectivo
-        if (newTip.paymentMethod === "cash") {
-            totalAmount.value += confirmedValueMoney.value;
+        try {
+            // First save to Firebase
+            await addPaymentToFirestore({
+                ...payment,
+                splitAmount: String(payment.splitAmount) // Convert splitAmount to string
+            });
+
+            // Then update local state
+            tip.value.push({
+                valueMoney: payment.valueMoney,
+                paymentMethod: payment.paymentMethod,
+                splitAmount: payment.splitAmount
+            });
+
+            // Update total for cash payments
+            if (newTip.paymentMethod === "cash") {
+                totalAmount.value += confirmedValueMoney.value;
+            }
+
+            // Reset values
+            confirmedValueMoney.value = 0;
+            newTip.paymentMethod = options[0].value;
+            newTip.peopleAmount = 1;
+
+        } catch (error) {
+            console.error("Error al procesar el pago:", error);
+            // You might want to show an error message to the user here
         }
-
-        // Reiniciar valores
-        confirmedValueMoney.value = 0;
-        newTip.paymentMethod = options[0].value;
-        newTip.peopleAmount = 1;
     } else {
         console.error("Faltan datos para agregar el pago.");
     }
