@@ -94,34 +94,30 @@
 
             <v-col cols="4" class="bg-blue lighten-2">Columna 3
                 <h2>Lista de Pagos</h2>
-                <ul>
-                    <li v-for="payment in items" :key="payment.id" class="border p-2 rounded my-1">
-                        💰 <strong>${{ payment.valueMoney }}</strong> -
-                        🏦 {{ payment.paymentMethod }}
-                        (Dividido: ${{ payment.splitAmount }}, Personas: {{ payment.peopleAmount }})
-                    </li>
-                </ul>
+
             </v-col>
         </v-row>
     </v-container>
-    <v-col cols="4" class="bg-blue lighten-2">Columna 3
-        <h2>Lista de Pagos</h2>
-        <ul>
-            <li v-for="(payment, index) in tip" :key="index" class="border p-2 rounded my-1">
-                💰 <strong>${{ payment.valueMoney }}</strong> -
-                🏦 {{ payment.paymentMethod }}
-                (Dividido: ${{ payment.splitAmount }})
-            </li>
-        </ul>
-    </v-col>
+
 
     <v-col>
         <h3>Total Pagado</h3>
 
-        <v-btn @click="addPayment" class="pay-button" color="orange">
+        <v-btn @click="guardarPago" class="pay-button" color="orange">
             Pagar
         </v-btn>
     </v-col>
+
+    <v-col cols="12">
+        <h2>Método de Pago</h2>
+        <v-btn-toggle v-model="newTip.paymentMethod" class="flex flex-wrap gap-2" mandatory>
+            <v-btn v-for="option in options" :key="option.value" :value="option.value" class="bg-blue-500 text-black">
+                {{ option.label }}
+            </v-btn>
+        </v-btn-toggle>
+    </v-col>
+
+
     <v-col cols="4" class="bg-blue lighten-2">Columna 3
         <h2>Lista de Pagos</h2>
         <ul>
@@ -131,6 +127,28 @@
                 (Dividido: ${{ payment.splitAmount }})
             </li>
         </ul>
+    </v-col>
+
+ 
+
+
+    <v-col cols="4" class="bg-blue lighten-2">
+        <h2>Lista de Pagos 18-03-25</h2>
+<!-- 🔄 Mostrar mensaje si aún está cargando -->
+<p v-if="loading">Cargando pagos...</p>
+
+<!-- 🚀 Mostrar lista solo si hay datos -->
+<ul v-if="objetos.length > 0">
+    <li v-for="payment in objetos" :key="payment.id" class="border p-2 rounded my-1">
+        💰 <strong>${{ payment.valueMoney }}</strong> - 
+        🏦 {{ payment.paymentMethod }}
+        (Dividido: ${{ payment.splitAmount }}, Personas: {{ payment.peopleAmount }})
+        <h2>hola</h2>
+    </li>
+</ul>
+
+<!-- ❌ Mensaje si no hay pagos -->
+<p v-else-if="!loading">No hay pagos registrados.</p>
     </v-col>
 </template>
 
@@ -139,6 +157,19 @@ import { ref, reactive, computed, watch, onMounted } from "vue";
 import "../assets/styles/tailwind.css";
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from "../firebaseConfig";
+import { usePayments } from "../composables/usePayments";
+
+//usePayments();
+
+onMounted(() => {
+    try {
+        // Código que podría fallar
+        usePayments();
+    } catch (error) {
+        console.error("Error en mounted:", error);
+    }
+});
+
 
 const buttonLayout = ref([
     "1",
@@ -163,12 +194,46 @@ const toggleEdit = () => {
     }
 };
 
+// Estado reactivo para los datos
+const objetos = ref<PaymentTips[]>([]);
+    const loading = ref(true); // Para saber si aún está cargando
+
+// Función para obtener datos de Firebase
+const getObjetos = async () => {
+    objetos.value = []; // Limpiar datos previos
+    try{
+        const querySnapshot = await getDocs(collection(db, 'tips_payments'));
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        objetos.value.push({
+            id: doc.id,
+            valueMoney: data.valueMoney,
+            paymentMethod: data.paymentMethod,
+            splitAmount: data.splitAmount,
+            peopleAmount: data.peopleAmount
+        });
+    });
+    } catch (error){
+        console.error("Error al obtener los datos:", error);
+
+    } finally {
+        loading.value = false; // Marcar como cargado
+    }
+
+};
+
+// Llamar a getItems al montar el componente
+onMounted(getObjetos);
+
+
 const options = [
     { value: "cash", label: "CASH" },
     { value: "cardBBVA", label: "BBVA 1234" },
     { value: "cardSANTANDER", label: "SANTANDER 1234" },
 ];
 const totalAmount = ref(5500);
+const montoTotal = ref(1500); // Ejemplo, podrías obtenerlo dinámicamente
+const pagosParciales = ref([{ monto: 0, metodo: "efectivo" }]);
 const confirmedValueMoney = ref(0); // Almacena el valor confirmado
 const tip = ref<
     { valueMoney: number; paymentMethod: string; splitAmount: number }[]
@@ -181,6 +246,60 @@ const newTip = reactive({
     paymentMethod: options[0].value,
     peopleAmount: 1,
 });
+const agregarPagoParcial = () => {
+    pagosParciales.value.push({ monto: 0, metodo: "efectivo" });
+};
+
+const eliminarPagoParcial = (index: number) => {
+    pagosParciales.value.splice(index, 1);
+};
+
+const guardarPago = async () => {
+    try {
+        // 1. Crea el documento del pago principal en la colección "pagos"
+        const docRef = await addDoc(collection(db, "pagos"), {
+            monto_total: montoTotal.value,
+            fecha: new Date(),
+        });
+        // 2. Añade cada pago parcial a la subcolección "pagos_parciales"
+        const pagosParcialesRef = collection(db, `pagos/${docRef.id}/pagos_parciales`);
+        for (const pago of pagosParciales.value) {
+            await addDoc(pagosParcialesRef, pago);
+        }
+
+        // 3. Limpia la pantalla después de guardar
+        pagosParciales.value = [{ monto: 0, metodo: "efectivo" }];
+        alert("Pago registrado correctamente");
+    } catch (error) {
+        console.error("Error al guardar el pago:", error);
+    }
+};
+
+const pagos = ref([]);
+
+const obtenerPagos = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, "tips_Payments"));
+        const listaPagos = [];
+
+        for (const doc of querySnapshot.docs) {
+            const pagoPrincipal = { ...doc.data(), id: doc.id, pagosParciales: [] };
+
+            try {
+
+            } catch (error) {
+                console.error(`Error obteniendo pagos parciales para ${doc.id}:`, error);
+            }
+
+            listaPagos.push(pagoPrincipal);
+        }
+
+
+        console.log("Pagos obtenidos:", pagos.value);
+    } catch (error) {
+        console.error("Error obteniendo pagos principales:", error);
+    }
+};
 
 // Cálculo del monto por persona
 const amountPerPerson = computed(() => newTip.peopleAmount > 0 ? (confirmedValueMoney.value / newTip.peopleAmount).toFixed(2) : "0");
@@ -191,29 +310,14 @@ interface PaymentTips {
     peopleAmount: number;
     id?: string;
 }
-
+// Monitorea el cambio de selección
+watch(() => newTip.paymentMethod, (newVal) => {
+    console.log('Método de pago seleccionado:', newVal);
+});
 // Define el tipo del array correctamente
-const items = ref<PaymentTips[]>([]);
 // Obtener datos de Firestore
 
-const getItems = async () => {
-    items.value = [];
-    const querySnapshot = await getDocs(collection(db, 'tips_payments'));
-    querySnapshot.forEach((doc) => {
-        const data = doc.data() as PaymentTips; // Asegúrate de tipar correctamente
-        items.value.push({
-            valueMoney: data.valueMoney,
-            paymentMethod: data.paymentMethod,
-            splitAmount: data.splitAmount,
-            peopleAmount: data.peopleAmount,
-            id: doc.id,
-        });
-    });
-};
-
-onMounted(() => {
-    getItems();
-});
+//const { items, getItems } = usePayments();
 const addPaymentToFirestore = async (payment: {
     valueMoney: number;
     paymentMethod: string;
@@ -282,7 +386,7 @@ const addPayment = async () => {
 
 
 
-// Función para confirmar el valor ingresado y asignarlo a `newTip.valueMoney`
+// Función para confirmar el valor ingresado y asignarlo a newTip.valueMoney
 const confirmValue = () => {
     if (inputText.value) {
         confirmedValueMoney.value = parseFloat(inputText.value) || 0; // Guardamos el valor final
@@ -294,7 +398,8 @@ const confirmValue = () => {
 
 const handleClick = (value: string) => {
     if (value === '✔') {
-        confirmValue(); // Eliminar el último carácter
+        agregarPagoParcial();
+        // Eliminar el último carácter confirmValue();
     } else {
         inputText.value += value; // Agregar el número al texto
     }
@@ -304,7 +409,7 @@ const deleteText = () => {
     inputText.value = inputText.value.slice(0, -1); // Borra el último dígito
 };
 
-// Sincroniza `newTip.valueMoney` con `inputText`
+// Sincroniza newTip.valueMoney con inputText
 watch(inputText, (newValue) => {
     newTip.valueMoney = parseFloat(newValue) || 0;
 });
@@ -316,6 +421,21 @@ watch(tip, (newPayments) => {
     totalAmount.value = 5500 + cashTotal;
 }, { deep: true });
 
+
+
+// Llamar a `getItems` en el hook onMounted, con manejo de errores
+onMounted(async () => {
+    try {
+         // Llamada a la función del composable
+        await obtenerPagos(); // Obtener datos de Firebase
+    } catch (error) {
+        console.error("Error en onMounted:", error);
+    }
+});
+
+
+
+// Resto de tus métodos y reactividad no se tocaron, salvo para mantener consistencia.
 </script>
 
 <style scoped></style>
