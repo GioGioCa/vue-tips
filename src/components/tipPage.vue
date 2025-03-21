@@ -94,7 +94,20 @@
 
             <v-col cols="4" class="bg-blue lighten-2">Columna 3
                 <h2>Lista de Pagos</h2>
+                <!-- 🔄 Mostrar mensaje si aún está cargando -->
+                <p v-if="loading">Cargando pagos...</p>
 
+                <!-- 🚀 Mostrar lista solo si hay datos -->
+                <ul v-if="objetos.length > 0">
+                    <li v-for="payment in objetos" :key="payment.id" class="border p-2 rounded my-1">
+                        💰 <strong>${{ payment.valueMoney }}</strong> - 
+                        🏦 {{ payment.paymentMethod }}
+                        (Dividido: ${{ payment.splitAmount }}, Personas: {{ payment.peopleAmount }})
+                        <h2>hola</h2>
+                    </li>
+                </ul>
+                <!-- ❌ Mensaje si no hay pagos -->
+                <p v-else-if="!loading">No hay pagos registrados.</p>
             </v-col>
         </v-row>
     </v-container>
@@ -129,26 +142,11 @@
         </ul>
     </v-col>
 
- 
+
 
 
     <v-col cols="4" class="bg-blue lighten-2">
-        <h2>Lista de Pagos 18-03-25</h2>
-<!-- 🔄 Mostrar mensaje si aún está cargando -->
-<p v-if="loading">Cargando pagos...</p>
 
-<!-- 🚀 Mostrar lista solo si hay datos -->
-<ul v-if="objetos.length > 0">
-    <li v-for="payment in objetos" :key="payment.id" class="border p-2 rounded my-1">
-        💰 <strong>${{ payment.valueMoney }}</strong> - 
-        🏦 {{ payment.paymentMethod }}
-        (Dividido: ${{ payment.splitAmount }}, Personas: {{ payment.peopleAmount }})
-        <h2>hola</h2>
-    </li>
-</ul>
-
-<!-- ❌ Mensaje si no hay pagos -->
-<p v-else-if="!loading">No hay pagos registrados.</p>
     </v-col>
 </template>
 
@@ -250,11 +248,9 @@ const agregarPagoParcial = () => {
     pagosParciales.value.push({ monto: 0, metodo: "efectivo" });
 };
 
-const eliminarPagoParcial = (index: number) => {
-    pagosParciales.value.splice(index, 1);
-};
 
-const guardarPago = async () => {
+
+const guardarPago2 = async () => {
     try {
         // 1. Crea el documento del pago principal en la colección "pagos"
         const docRef = await addDoc(collection(db, "pagos"), {
@@ -274,6 +270,34 @@ const guardarPago = async () => {
         console.error("Error al guardar el pago:", error);
     }
 };
+
+const guardarPago = async () => {
+    try {
+        console.log("Guardando pago..."); // Verifica si se ejecuta
+
+        const docRef = await addDoc(collection(db, "tips_payments"), {
+            valueMoney: confirmedValueMoney.value,
+            paymentMethod: newTip.paymentMethod,
+            splitAmount: Number(amountPerPerson.value),
+            peopleAmount: newTip.peopleAmount,
+            createdAt: serverTimestamp()
+        });
+
+        console.log("Pago guardado con ID:", docRef.id); // Verifica que se guarde en Firebase
+
+        await obtenerPagos(); // Recargar lista sin refrescar la página
+
+        // Reiniciar valores
+        confirmedValueMoney.value = 0;
+        newTip.paymentMethod = options[0].value;
+        newTip.peopleAmount = 1;
+
+        alert("Pago registrado correctamente");
+    } catch (error) {
+        console.error("Error al guardar el pago:", error);
+    }
+};
+
 
 const pagos = ref([]);
 
@@ -314,10 +338,7 @@ interface PaymentTips {
 watch(() => newTip.paymentMethod, (newVal) => {
     console.log('Método de pago seleccionado:', newVal);
 });
-// Define el tipo del array correctamente
-// Obtener datos de Firestore
 
-//const { items, getItems } = usePayments();
 const addPaymentToFirestore = async (payment: {
     valueMoney: number;
     paymentMethod: string;
@@ -398,8 +419,9 @@ const confirmValue = () => {
 
 const handleClick = (value: string) => {
     if (value === '✔') {
-        agregarPagoParcial();
-        // Eliminar el último carácter confirmValue();
+        //agregarPagoParcial();
+        // Eliminar el último carácter 
+        confirmValue();
     } else {
         inputText.value += value; // Agregar el número al texto
     }
