@@ -4,9 +4,17 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-  "allowJs": true,
   "compilerOptions": {
     "strict": true,
     "moduleResolution": "node",
-  }
+    "types": ["@mdi/js","vue/macros"],
+    "skipLibCheck": true,
+    "declaration": true,
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM"],
+    "allowJs": true,
+  },
+  "include": ["env.d.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"]
 }
