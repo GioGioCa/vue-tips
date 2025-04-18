@@ -1,5 +1,5 @@
 <template class="">
-    <Header :totalAmount="totalCash" @goBack="" />
+    <Header @goBack="" />
     <v-container>
         <v-row>
             <v-col cols="4" class="bg-red lighten-2">Columna 1
@@ -43,15 +43,6 @@
                                     </v-col>
                                 </v-row>
                             </v-container>
-                            <v-col cols="12">
-        <h2>Método de Pago</h2>
-        <v-btn-toggle v-model="newTip.paymentMethod" class="flex flex-wrap gap-2" mandatory>
-            <v-btn v-for="option in options" :key="option.value" :value="option.value" class="bg-blue-500 text-black">
-                {{ option.label }}
-            </v-btn>
-        </v-btn-toggle>
-    </v-col>
-
                         </v-row>
                     </v-col>
                 </v-row>
@@ -82,9 +73,7 @@
 
             </v-col>
 
-
-            <v-col cols="4" class="bg-blue lighten-2">Columna 3
-                <h2>Lista de Pagos</h2>
+            <v-col cols="4" class="">
                 <PaymentsList/>
             </v-col>
         </v-row>
@@ -100,7 +89,7 @@
     </v-col>
 
     <v-col cols="12">
-        <h2>Método de Pago</h2>
+        <h2>Método 234 de Pago</h2>
         <v-btn-toggle v-model="newTip.paymentMethod" class="flex flex-wrap gap-2" mandatory>
             <v-btn v-for="option in options" :key="option.value" :value="option.value" class="bg-blue-500 text-black">
                 {{ option.label }}
@@ -110,22 +99,22 @@
 
 
     <v-select v-model="newTip.paymentMethod" :items="options" item-title="label" item-value="value"
-        label="Método de pago" outlined dense>
+        label="Método de pago 23424234" outlined dense>
         console.log("Método de pago seleccionado:", newTip.paymentMethod);
-
     </v-select>
-    <PaymentList/>
-    <x />
+
+    <inputPad/>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, watchEffect } from "vue";
 import "../assets/styles/tailwind.css";
-import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp, query, where } from 'firebase/firestore';
 import { db } from "../firebaseConfig";
 import { usePayments } from "../composables/usePayments";
 import Header from "./Header.vue";
 import PaymentsList from "./PaymentsList.vue";
+import inputPad from "./inputPad.vue";
 //usePayments();
 
 onMounted(() => {
@@ -196,13 +185,6 @@ const getObjetos = async () => {
 onMounted(getObjetos);
 
 import { usePaymentMethod } from '../composables/usePaymentMethod';
-//import SvgIcon from '@jamescoyle/vue-icon'
-import { mdiAccount } from '@mdi/js'
-//import {CheckCircleOutlineIcon} from '@mui/icons-material';
-//import x from '@mui/icons-material/CheckCircleOutline';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import x from '../assets/check-circle-outline.svg';
-//import { CheckCircleOutlineIcon } from '@mui/material';
 const { options, selectedMethod } = usePaymentMethod();
 
 const totalAmount = ref(5500);
@@ -450,8 +432,20 @@ onMounted(async () => {
     }
 });
 
+const fetchTotalCashPayments = async () => {
+  const cashPaymentsQuery = query(
+    collection(db, "tips_payments"),
+    where("paymentMethod", "==", "cash")
+  );
+  const querySnapshot = await getDocs(cashPaymentsQuery);
+  const totalCashFire = querySnapshot.docs.reduce((sum, doc) => {
+    const data = doc.data() as PaymentTips;
+    return sum + data.valueMoney;
+  }, 0);
+  return totalCashFire;
+};
 
-
+//onMounted(fetchPayments);
 // Resto de tus métodos y reactividad no se tocaron, salvo para mantener consistencia.
 </script>
 

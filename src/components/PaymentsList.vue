@@ -1,41 +1,55 @@
 <!-- components/PaymentList.vue -->
-<template>
-    <table>
+<template class="flex justify-center">
+    <table class="w-full table-auto text-black">
         <thead>
             <tr>
-                <th><strong>Pagos</strong></th>
+                <th class="text-left pb-2 text-lg font-bold" colspan="3">
+                    Pagos
+                </th>
             </tr>
         </thead>
-        <tbody>
-            <tr v-for="payment in payments" :key="payment.id">
-                <td>{{ payment.paymentMethod}}</td>
-                <td>{{ payment.valueMoney}}</td>
+        <tbody class="">
+            <tr v-for="payment in payments" :key="payment.id" class=" rounded-0 border-b-lg align-content-md-end justify-end overflow-hidden">
+                <td class="text-align: right border rounded-lg">
+                    <!----<oh-vue-icon :name="getPaymentIcon(payment.paymentMethod)" class="text-gray-600 w-5 h-5" />-->
+                    <v-icon :name="getPaymentIcon(payment.paymentMethod)"  ></v-icon>
+                    <v-icon :icon="getPaymentIcon(payment.paymentMethod)"></v-icon>
+                    <span class="text-align: end text-center">{{ payment.paymentMethod }}</span>
+                    ${{ payment.valueMoney.toFixed(2) }}
+                    <button class="text-center hover: ">
+                        <oh-vue-icon name="co-delete" class="w-4 h-4" />
+                    </button>
+
+                </td>
             </tr>
         </tbody>
     </table>
 </template>
 
 <script setup lang="ts">
-import {db} from '../firebaseConfig';
-import {collection, getDocs, doc, updateDoc} from 'firebase/firestore';
-import { ref, onMounted } from 'vue';
-
-
-interface PaymentTips {
-    valueMoney: number;
-    paymentMethod: string;
-    splitAmount: number;
-    peopleAmount: number;
-    id?: string;
-}
-const payments = ref<PaymentTips[]>([]);
-
-const fetchPayments = async () => {
-    const querySnapshot = await getDocs(collection(db, "tips_payments"));
-    payments.value = querySnapshot.docs
-        .map(doc => ({id: doc.id, ...doc.data() as PaymentTips}));
-}
+import { onMounted } from "vue";
+import { OhVueIcon, addIcons } from "oh-vue-icons";
+import {IconAliases,IconOptions,IconProps,IconSet} from "vuetify";
+import {
+    CoCash,
+    CoCreditCard,
+    PxCreditCard,
+    CoDelete,
+} from "oh-vue-icons/icons";
+import { MdCloseRound } from "oh-vue-icons/icons";
+import { usePayments } from '../composables/usePayments';
+import { Icon } from "@mui/material";
+const { payments, totalCash, fetchPayments } = usePayments();
+// Se agregan los iconos mediante este metodo para poder usarlos
+addIcons(CoCash, CoCreditCard, PxCreditCard, CoDelete, MdCloseRound);
 
 onMounted(fetchPayments);
+
+// Computed para obtener el ícono correcto
+const getPaymentIcon = (method: string) => {
+    //return method.toLowerCase() === "cash" ? "co-cash" : "px-credit-card";
+    return method.toLowerCase() === "cash" ? "mdi-cash-multiple" : "mdi-credit-card-outline";
+};
+
 
 </script>

@@ -20,7 +20,7 @@
                         </v-col>
                         <v-col cols="12" align="center">
                             <h1 class="text-orange bg-orange-accent-1 font-bold rounded-lg">
-                                {{ props.totalAmount }}
+                                ${{ totalCash.toFixed(2) }}
                             </h1>
                         </v-col>
                     </v-row>
@@ -32,16 +32,11 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { usePayments } from '../composables/usePayments';
+const { payments, totalCash, fetchPayments } = usePayments();
 
 
 
-// Definir props con validación
-const props = defineProps({
-    totalAmount: {
-        type: Number,
-        required: true
-    }
-});
 
 // Definir eventos
 const emit = defineEmits(['goBack']);

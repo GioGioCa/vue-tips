@@ -2,15 +2,11 @@
 //import HelloWorld from './components/HelloWorld.vue'
 //@ts-ignore
 import tipPage from './components/tipPage.vue';
-import healer from './components/Header.vue';
-import Payments from './pages/payments.vue'; // Importamos Payments.vue
-
 //MUST BE CALL OTHERWISE, BC POLYMORPHISM
 </script>
 
 <template>
   <tipPage/>
-  <Payments />  <!-- Llamamos al componente -->
 
 </template>
 

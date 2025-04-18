@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue';
-import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 // Define la interfaz de los datos
@@ -8,45 +8,39 @@ interface PaymentTips {
     paymentMethod: string;
     splitAmount: number;
     peopleAmount: number;
-    id: string;
+    id?: string;
 }
 
 // Define el array reactivo para almacenar los datos
-const items = ref<PaymentTips[]>([]);
-
+const payments = ref<PaymentTips[]>([]);
+const totalCash = ref<number>(0);
 // Método para obtener los datos de Firestore
-const getItems = async () => {
-    items.value = [];
-    const querySnapshot = await getDocs(collection(db, 'tips_payments'));
-    querySnapshot.forEach((doc) => {
-        const data = doc.data() as PaymentTips;
-        items.value.push({
-            valueMoney: data.valueMoney,
-            paymentMethod: data.paymentMethod,
-            splitAmount: data.splitAmount,
-            peopleAmount: data.peopleAmount,
-            id: doc.id,
-        });
-    });
+const fetchPayments = async () => {
+    const querySnapshot = await getDocs(collection(db, "tips_payments"));
+    payments.value = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as PaymentTips),
+    }));
+    totalCash.value = await fetchTotalCashPayments();
 };
-const q = query(collection(db, "tips_payments"));
-const notes = ref([]);
 
-const getNotes = async () => {
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-        const docData = doc.data();
-        const note: PaymentTips = {
-            id: doc.id,
-            valueMoney: docData.valueMoney,
-            paymentMethod: docData.paymentMethod,
-            splitAmount: docData.splitAmount,
-            peopleAmount: docData.peopleAmount
-        };
-        items.value.push(note);
-    });
-}
+
+const fetchTotalCashPayments = async () => {
+    const cashPaymentsQuery = query(
+        collection(db, "tips_payments"),
+        where("paymentMethod", "==", "cash")
+    );
+    const querySnapshot = await getDocs(cashPaymentsQuery);
+    const total = querySnapshot.docs.reduce((sum, doc) => {
+        const data = doc.data() as PaymentTips;
+        return sum + data.valueMoney;
+    }, 0);
+    return total;
+};
+
+onMounted(fetchPayments);
 
 export function usePayments() {
-    return { notes, getNotes };
+    onMounted(fetchPayments);
+    return { payments, totalCash, fetchPayments, fetchTotalCashPayments };
 }
