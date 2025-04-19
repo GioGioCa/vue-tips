@@ -7,7 +7,8 @@
                     <button type="button"
                         class="py-1 px-2 m-1 rounded-sm font-times text-sm text-orange bg-transparent text-2xl"
                         @click="goBack">
-                        &#10094; Atrás
+                        <v-icon class="text-orange">mdi-chevron-left</v-icon>
+                        <span>Atrás</span>
                     </button>
                 </v-col>
                 <v-col>
@@ -35,13 +36,10 @@ import { defineProps, defineEmits } from 'vue';
 import { usePayments } from '../composables/usePayments';
 const { payments, totalCash, fetchPayments } = usePayments();
 
-
-
-
 // Definir eventos
 const emit = defineEmits(['goBack']);
 const goBack = () => emit('goBack');
 </script>
 
 
-<style scoped></style>
+<style scoped lang="ts"></style>

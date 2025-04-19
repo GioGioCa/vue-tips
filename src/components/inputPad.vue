@@ -1,47 +1,57 @@
 <template>
-    <v-container  class="align-center">
-        <!-- Campo visual para mostrar el número -->
-        <v-text-field v-model="inputText" label="Monto parcial" readonly class="text-h5 font-mono text-center"
-            hide-details @click="startEditing"></v-text-field>
-
-        <!-- Panel de botones numéricos -->
-        <v-row dense class="gap-1 justify-center " v-if="isEditing">
-            <v-col v-for="(item, index) in buttonLayout" :key="index" cols="4" class="pa-1 align-self-center">
+    <v-row no-gutters>
+        <v-col cols="12">
+            <v-text-field
+                v-model="inputText"
+                label="Ingresar número"
+                readonly
+                dense
+                outlined
+                append-inner-icon="mdi-backspace-outline"
+                @click:append-inner=deleteText
+                :disabled="!isEditing"
+            />
+        </v-col>
+    </v-row>
+    <v-container>
+        <v-row  class="gap-1 justify-center">
+            <v-col  cols="3" class="pa-1">
                 <v-btn
-                    class="bg-gray-100 text-black font-bold flex align-self-center rounded-lg text-h6 w-16 h-16"
-                    @click="handleClick(item)">
-                    {{ item }}
+                    v-for="(btn, index) in buttonLayout" 
+                    :key="index"
+                    @click="handleClick(btn)"
+                    :disabled="!isEditing"
+                    outline
+                >
+                    <v-icon v-if="btn.startsWith('mdi')">{{ btn }}</v-icon>
+                    <span v-else>{{ btn }}</span>
                 </v-btn>
             </v-col>
-            <v-text-field label="Label" prepend-icon="$vuetify"></v-text-field>
-
         </v-row>
-
-        <!-- Botón para eliminar -->
-        <div class="text-center mt-2" v-if="isEditing">
-            <v-btn color="red" variant="outlined" class="font-bold" @click="deleteText">
-                Borrar
-            </v-btn>
-        </div>
     </v-container>
+    <v-icon>mdi-check-circle-outline</v-icon>
 </template>
 
 <script setup lang="ts">
+import { BackspaceOutlined } from '@mui/icons-material';
 import { ref } from 'vue';
 
 const inputText = ref('');
 const confirmedValueMoney = ref<number | null>(null);
 const isEditing = ref(false);
-
+const checkIcon = "mdi-check-circle-outline";
+const backspaceIcon = "mdi-backspace-outline";
 const buttonLayout = ref([
     "1", "2", "3",
     "4", "5", "6",
     "7", "8", "9",
-    "00", "0", "✔",
+    "00", "0", "mdi-check-circle-outline",
 ]);
 
+
+
 const handleClick = (value: string) => {
-    if (value === '✔') {
+    if (value === checkIcon) {
         confirmValue();
     } else {
         inputText.value += value;

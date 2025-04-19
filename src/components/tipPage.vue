@@ -36,7 +36,7 @@
                                         class="d-flex justify-center">
                                         <v-btn-toggle v-model="selectedMethod" mandatory class="flex flex-wrap gap-2">
                                             <v-btn :value="option.value" class="bg-white text-black text-center"
-                                                style="max-width: 200px; min-width: 150px; height: 80px; border-radius: 12px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">
+                                                style=" border-radius: 12px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">
                                                 {{ option.label }}
                                             </v-btn>
                                         </v-btn-toggle>
@@ -87,23 +87,7 @@
             Pagar
         </v-btn>
     </v-col>
-
-    <v-col cols="12">
-        <h2>Método 234 de Pago</h2>
-        <v-btn-toggle v-model="newTip.paymentMethod" class="flex flex-wrap gap-2" mandatory>
-            <v-btn v-for="option in options" :key="option.value" :value="option.value" class="bg-blue-500 text-black">
-                {{ option.label }}
-            </v-btn>
-        </v-btn-toggle>
-    </v-col>
-
-
-    <v-select v-model="newTip.paymentMethod" :items="options" item-title="label" item-value="value"
-        label="Método de pago 23424234" outlined dense>
-        console.log("Método de pago seleccionado:", newTip.paymentMethod);
-    </v-select>
-
-    <inputPad/>
+    <InputPad/>
 </template>
 
 <script setup lang="ts">
@@ -114,8 +98,7 @@ import { db } from "../firebaseConfig";
 import { usePayments } from "../composables/usePayments";
 import Header from "./Header.vue";
 import PaymentsList from "./PaymentsList.vue";
-import inputPad from "./inputPad.vue";
-//usePayments();
+import InputPad from "./inputPad.vue";
 
 onMounted(() => {
     try {

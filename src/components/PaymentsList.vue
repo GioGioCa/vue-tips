@@ -16,8 +16,8 @@
                     <v-icon :icon="getPaymentIcon(payment.paymentMethod)"></v-icon>
                     <span class="text-align: end text-center">{{ payment.paymentMethod }}</span>
                     ${{ payment.valueMoney.toFixed(2) }}
-                    <button class="text-center hover: ">
-                        <oh-vue-icon name="co-delete" class="w-4 h-4" />
+                    <button class="text-end hover: ">
+                        <v-icon class="text-red">mdi-close</v-icon>
                     </button>
 
                 </td>
