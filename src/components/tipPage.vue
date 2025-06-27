@@ -13,7 +13,7 @@
                 </v-row>
                 </v-card>
             </v-col>
-            <v-col cols="4" class="bg-green lighten-2">Columna 2
+            <v-col cols="4" class="">Columna 2
                 <v-container>
                     <InputPad :isEditing="isEditing" @confirmed="handleConfirmed" @close="isEditing = false"/>
                 </v-container>
@@ -31,12 +31,10 @@
         <h3>Total Pagado</h3>
 
         <v-btn
-        
-      color="primary"
+        color="primary"
         @click="guardarPago" class="pay-button" >
-            Pagar ${{ totalTips.toFixed(2) }} en Propinas
+            Pagar ${{ confirmedValueMoney }} en Propinas
         </v-btn>
-        <div>Restante por Pagar: ${{ restante.toFixed(2) }}</div>
     </v-col>
 </template>
 

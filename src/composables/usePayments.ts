@@ -1,5 +1,5 @@
-import { ref, onMounted } from 'vue';
-import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc, where } from 'firebase/firestore';
+import { ref, onMounted, onUnmounted} from 'vue';
+import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 // Define la interfaz de los datos
@@ -15,15 +15,22 @@ interface PaymentTips {
 const payments = ref<PaymentTips[]>([]);
 const totalCash = ref<number>(0);
 // Método para obtener los datos de Firestore
+//const querySnapshot = await getDocs(collection(db, "tips_payments"));
+
 const fetchPayments = async () => {
-    const querySnapshot = await getDocs(collection(db, "tips_payments"));
+
+    const q = query(collection(db, "tips_payments"), orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
     payments.value = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as PaymentTips),
     }));
     totalCash.value = await fetchTotalCashPayments();
-};
+});
 
+onUnmounted(() => unsubscribe());
+};
 
 const fetchTotalCashPayments = async () => {
     const cashPaymentsQuery = query(
