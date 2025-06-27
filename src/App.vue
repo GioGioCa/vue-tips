@@ -6,8 +6,7 @@ import tipPage from './components/tipPage.vue';
 </script>
 
 <template>
-  <tipPage/>
-
+  <RouterView></RouterView>
 </template>
 
 <style scoped>

@@ -2,9 +2,9 @@ import { ref } from 'vue';
 
 export function usePaymentMethod() {
     const options = ref([
-        { value: "cash", label: "CASH" },
-        { value: "BBVA", label: "BBVA 1234" },
-        { value: "SANTANDER", label: "SANTANDER 1234" },
+        { value: "cash", label: "CASH",icon: "mdi-cash" },
+        { value: "BBVA", label: "BBVA",icon: "mdi-credit-card-outline"},
+        { value: "SANTANDER", label: "SANTANDER",icon: "mdi-credit-card-outline" },
     ]);
 
     const selectedMethod = ref(options.value[0].value); // Por defecto, el primer método

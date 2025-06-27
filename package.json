@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "postinstall": "vue-demi-switch 3",
     "build": "run-p type-check \"build-only {@}\" --",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force"
@@ -22,7 +23,9 @@
     "firebase": "^11.4.0",
     "material-design-icons-iconfont": "^6.7.0",
     "oh-vue-icons": "^1.0.0-rc3",
+    "pinia": "^3.0.2",
     "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
     "vuetify": "^3.7.11"
   },
   "devDependencies": {
@@ -33,9 +36,11 @@
     "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.2",
+    "sass": "^1.89.2",
+    "sass-embedded": "^1.89.2",
     "tailwindcss": "^4.0.6",
     "typescript": "~5.6.2",
-    "vite": "^6.0.5",
+    "vite": "^6.3.5",
     "vite-plugin-vuetify": "^2.1.0",
     "vue-tsc": "^2.2.0"
   }

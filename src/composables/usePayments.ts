@@ -38,7 +38,7 @@ const fetchTotalCashPayments = async () => {
     return total;
 };
 
-onMounted(fetchPayments);
+//onMounted(fetchPayments);
 
 export function usePayments() {
     onMounted(fetchPayments);

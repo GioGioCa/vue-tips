@@ -1,79 +1,85 @@
 <template>
-    <v-row no-gutters>
-        <v-col cols="12">
-            <v-text-field
-                v-model="inputText"
-                label="Ingresar número"
-                readonly
-                dense
-                outlined
-                append-inner-icon="mdi-backspace-outline"
-                @click:append-inner=deleteText
-                :disabled="!isEditing"
-            />
+  <v-card class="pa-4" color="#eee" rounded="xl">
+    <v-text-field
+      v-model="inputText"
+      label="Ingresar número"
+      readonly
+      dense
+      outlined
+      hide-details
+      append-inner-icon="mdi-backspace-outline"
+      @click:append-inner="deleteText"
+      :disabled="!props.isEditing"
+      class="mb-4"
+    />
+
+    <v-container class="pa-0" fluid>
+      <v-row dense>
+        <v-col
+          v-for="(btn, index) in buttonLayout"
+          :key="index"
+          cols="4"
+          class="d-flex justify-center pa-1"
+          color="red"
+        >
+          <v-btn
+            class="w-100"
+            color="white"
+            style="height: 60px; font-weight: bold"
+            :disabled="!props.isEditing"
+            @click="handleClick(btn)"
+          >
+            <v-icon v-if="btn.startsWith('mdi')">{{ btn }}</v-icon>
+            <span v-else>{{ btn }}</span>
+          </v-btn>
         </v-col>
-    </v-row>
-    <v-container>
-        <v-row  class="gap-1 justify-center">
-            <v-col  cols="3" class="pa-1">
-                <v-btn
-                    v-for="(btn, index) in buttonLayout" 
-                    :key="index"
-                    @click="handleClick(btn)"
-                    :disabled="!isEditing"
-                    outline
-                >
-                    <v-icon v-if="btn.startsWith('mdi')">{{ btn }}</v-icon>
-                    <span v-else>{{ btn }}</span>
-                </v-btn>
-            </v-col>
-        </v-row>
+      </v-row>
     </v-container>
-    <v-icon>mdi-check-circle-outline</v-icon>
+  </v-card>
 </template>
 
 <script setup lang="ts">
-import { BackspaceOutlined } from '@mui/icons-material';
-import { ref } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
+
+const props = defineProps<{
+  isEditing: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'confirmed', value: number): void;
+  (e: 'close'): void;
+}>();
 
 const inputText = ref('');
-const confirmedValueMoney = ref<number | null>(null);
-const isEditing = ref(false);
-const checkIcon = "mdi-check-circle-outline";
-const backspaceIcon = "mdi-backspace-outline";
-const buttonLayout = ref([
-    "1", "2", "3",
-    "4", "5", "6",
-    "7", "8", "9",
-    "00", "0", "mdi-check-circle-outline",
-]);
-
-
+const buttonLayout = [
+  "1", "2", "3",
+  "4", "5", "6",
+  "7", "8", "9",
+  "00", "0", "mdi-check-circle-outline",
+];
 
 const handleClick = (value: string) => {
-    if (value === checkIcon) {
-        confirmValue();
-    } else {
-        inputText.value += value;
+  if (value === "mdi-check-circle-outline") {
+    confirmValue();
+  } else {
+    if (value === "00" || /^\d$/.test(value)) {
+      inputText.value += value;
     }
+  }
 };
 
 const confirmValue = () => {
-    if (inputText.value) {
-        confirmedValueMoney.value = parseFloat(inputText.value) || 0;
-        inputText.value = "";
-        isEditing.value = false;
-    }
+  const confirmed = parseFloat(inputText.value) || 0;
+  emit('confirmed', confirmed);
+  inputText.value = '';
+  emit('close');
 };
 
 const deleteText = () => {
-    inputText.value = inputText.value.slice(0, -1);
-};
-
-const startEditing = () => {
-    isEditing.value = true;
+  inputText.value = inputText.value.slice(0, -1);
 };
 </script>
+
 
 <style scoped lang="ts">
 
