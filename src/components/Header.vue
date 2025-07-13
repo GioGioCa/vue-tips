@@ -21,7 +21,7 @@
                         </v-col>
                         <v-col cols="12" align="center">
                             <h1 class="text-orange bg-orange-accent-1 font-bold rounded-lg">
-                                ${{ totalCash.toFixed(2) }}
+                                {{ headerTotalCash }}
                             </h1>
                         </v-col>
                     </v-row>
@@ -32,9 +32,17 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-import { usePayments } from '../composables/usePayments';
-const { payments, totalCash, fetchPayments } = usePayments();
+import { defineEmits, watchEffect,onMounted   } from 'vue';
+import {  usePayments } from '../composables/usePayments';
+const { fetchTotalCashPayments, totalCash }  = usePayments();
+const headerTotalCash = totalCash;
+
+onMounted(() => {
+    fetchTotalCashPayments();
+});
+watchEffect(() => {
+    console.log('Header total cash:', headerTotalCash.value);
+});
 
 // Definir eventos
 const emit = defineEmits(['goBack']);

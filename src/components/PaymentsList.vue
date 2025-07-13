@@ -11,11 +11,14 @@
         <tbody class="">
             <tr v-for="payment in payments" :key="payment.id" class=" rounded-0 border-b-lg align-content-md-end justify-end overflow-hidden">
                 <td class="text-align: right border rounded-lg">
-                    <!----<oh-vue-icon :name="getPaymentIcon(payment.paymentMethod)" class="text-gray-600 w-5 h-5" />-->
+                    <!----<oh-vue-icon :name="getPaymentIcon(payment.paymentMethod)" class="text-gray-600 w-5 h-5" />
                     <v-icon :name="getPaymentIcon(payment.paymentMethod)"  ></v-icon>
                     <v-icon :icon="getPaymentIcon(payment.paymentMethod)"></v-icon>
                     <span class="text-align: end text-center">{{ payment.paymentMethod }}</span>
-                    ${{ payment.valueMoney.toFixed(2) }}
+                    ${{ payment.valueMoney }}-->
+
+                    <v-icon :icon="getPaymentIcon(payment.paymentMethod)"></v-icon>
+                    {{ payment.paymentMethod }} - ${{ payment.valueMoney }}
                     <button class="text-end hover: ">
                         <v-icon class="text-red">mdi-close</v-icon>
                     </button>

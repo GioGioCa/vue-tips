@@ -1,5 +1,4 @@
 <template>
-
     <v-row>
       <v-col cols="12">
         <h5 class="text-orange">Total propinas</h5>
@@ -12,7 +11,6 @@
       </v-col>
 
     </v-row>
-
 </template>
 
 <script setup lang="ts">
@@ -36,9 +34,7 @@ const inputText = ref("");
 watch(
   () => props.confirmedValue,
   (newVal) => {
-    if (newVal !== null) {
-      inputText.value = newVal.toString();
-    }
+    inputText.value = newVal !== null ? newVal.toString() : '';
   }
 );
 

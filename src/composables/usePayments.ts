@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted} from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { collection, getDocs, query, orderBy, Timestamp, doc, getDoc, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
@@ -17,37 +17,43 @@ const totalCash = ref<number>(0);
 // Método para obtener los datos de Firestore
 //const querySnapshot = await getDocs(collection(db, "tips_payments"));
 
-const fetchPayments = async () => {
-
+const fetchPayments = () => {
     const q = query(collection(db, "tips_payments"), orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-    payments.value = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as PaymentTips),
-    }));
-    totalCash.value = await fetchTotalCashPayments();
-});
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        payments.value = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...(doc.data() as PaymentTips)
+        }));
+    });
 
-onUnmounted(() => unsubscribe());
+    onUnmounted(() => unsubscribe());
 };
 
-const fetchTotalCashPayments = async () => {
+const fetchTotalCashPayments = () => {
     const cashPaymentsQuery = query(
         collection(db, "tips_payments"),
         where("paymentMethod", "==", "cash")
     );
-    const querySnapshot = await getDocs(cashPaymentsQuery);
-    const total = querySnapshot.docs.reduce((sum, doc) => {
-        const data = doc.data() as PaymentTips;
-        return sum + data.valueMoney;
-    }, 0);
-    return total;
+
+    const unsubscribe = onSnapshot(cashPaymentsQuery, (snapshot) => {
+        const total = snapshot.docs.reduce((sum, doc) => {
+            const data = doc.data() as PaymentTips;
+            return sum + data.valueMoney;
+        }, 0);
+        totalCash.value = total;
+    });
+
+    onUnmounted(() => unsubscribe());
 };
+
 
 //onMounted(fetchPayments);
 
 export function usePayments() {
-    onMounted(fetchPayments);
+    onMounted(() => {
+        fetchPayments();
+        fetchTotalCashPayments();
+    });
     return { payments, totalCash, fetchPayments, fetchTotalCashPayments };
 }

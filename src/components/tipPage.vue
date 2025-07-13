@@ -1,5 +1,5 @@
 <template class="">
-    <Header @goBack="" />
+    <Header @goBack=""/>
     <v-container>
         <v-row>
             <v-col cols="4" class="">Columna 1
@@ -51,40 +51,11 @@ import DataInput from "./DataInput.vue";
 import PaymentDivided from "./PaymentDivided.vue";
 import PaymentMethodInput from "./PaymentMethodInput.vue";
 import Test from "./Test.vue";
+const { totalCash } = usePayments();
 
 const confirmedTip = ref<number | null>(1500); // valor por defecto
 const pagosParciales = ref([]); // lista de pagos parciales
-const restante = computed(() => {
-  const suma = pagosParciales.value.reduce((acc, p) => acc + p.monto, 0);
-  return Math.max(totalTips.value - suma, 0);
-});
-const selectedOption = ref<string | null>(null);
 
-const guardarPago2 = async () => {
-  if (!esPagoCompleto.value) {
-    alert("Aún falta completar el pago");
-    return;
-  }
-
-  const nuevoPago = {
-    total: totalTips.value,
-    divididoEntre: newTip.peopleAmount,
-    pagos: pagosParciales.value,
-    estado: "completo"
-  };
-
-  await firebase.database().ref("propinas/" + someGeneratedId()).set(nuevoPago);
-  alert("Propinas guardadas correctamente");
-};
-
-onMounted(() => {
-    try {
-        // Código que podría fallar
-        usePayments();
-    } catch (error) {
-        console.error("Error en mounted:", error);
-    }
-});
 
 const confirmedValueMoney = ref<number | null>(null);
 
@@ -131,12 +102,13 @@ const guardarPago = async () => {
 
         console.log("Pago guardado con ID:", docRef.id); // Verifica que se guarde en Firebase
 
-        await usePayments();
 
         // Reiniciar valores
-        confirmedValueMoney.value = 0;
+        // confirmedValueMoney.value = 0;
         newTip.paymentMethod = '';
         newTip.peopleAmount = 1;
+        confirmedValueMoney.value = null;
+        isEditing.value = false;
 
     } catch (error) {
         console.error("Error al guardar el pago:", error);
