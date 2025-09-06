@@ -6,7 +6,7 @@
                 <v-col cols="auto">
                     <button type="button"
                         class="py-1 px-2 m-1 rounded-sm font-times text-sm text-orange bg-transparent text-2xl"
-                        @click="goBack">
+                        @click="">
                         <v-icon class="text-orange">mdi-chevron-left</v-icon>
                         <span>Atrás</span>
                     </button>
@@ -21,7 +21,7 @@
                         </v-col>
                         <v-col cols="12" align="center">
                             <h1 class="text-orange bg-orange-accent-1 font-bold rounded-lg">
-                                {{ headerTotalCash }}
+                                ${{ totalCash }}
                             </h1>
                         </v-col>
                     </v-row>
@@ -31,17 +31,24 @@
     </header>
 </template>
 
-<script setup>
-import { defineEmits, watchEffect,onMounted   } from 'vue';
-import {  usePayments } from '../composables/usePayments';
-const { fetchTotalCashPayments, totalCash }  = usePayments();
-const headerTotalCash = totalCash;
+<script setup lang="ts">
+import { defineEmits, watchEffect, onMounted, onUnmounted   } from 'vue';
+import { useTransaction } from '../composables/usePayments';
+const { fetchTotalCashPayments, totalCash }  = useTransaction();
+
+console.log(totalCash.value);
+let stopCashListener: (() => void) | null = null;
 
 onMounted(() => {
-    fetchTotalCashPayments();
+    stopCashListener = fetchTotalCashPayments();
 });
+
 watchEffect(() => {
-    console.log('Header total cash:', headerTotalCash.value);
+    console.log('Header total cash:', totalCash.value);
+});
+
+onUnmounted(() => {
+    if (stopCashListener) stopCashListener();
 });
 
 // Definir eventos

@@ -4,8 +4,9 @@
     "moduleResolution": "node",
     "types": ["@mdi/js"],
     "skipLibCheck": true,
-    "target": "ES2023",
-    "lib": ["ES2023", "DOM"],
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext", "DOM"],
     "allowJs": true
   },
   "include": ["env.d.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"]

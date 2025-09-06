@@ -9,7 +9,6 @@
       hide-details
       append-inner-icon="mdi-backspace-outline"
       @click:append-inner="deleteText"
-      :disabled="!props.isEditing"
       class="mb-4"
     />
 
@@ -26,7 +25,6 @@
             class="w-100"
             color="white"
             style="height: 60px; font-weight: bold"
-            :disabled="!props.isEditing"
             @click="handleClick(btn)"
           >
             <v-icon v-if="btn.startsWith('mdi')">{{ btn }}</v-icon>
@@ -42,7 +40,6 @@
 import { ref, defineProps, defineEmits } from 'vue';
 
 const props = defineProps<{
-  isEditing: boolean;
 }>();
 
 const emit = defineEmits<{
