@@ -1,8 +1,5 @@
 <script setup lang="ts">
-
-import { ref } from 'vue';
-import tipPage from './components/tipPage.vue';
-
+import { RouterView } from 'vue-router';
 </script>
 
 <template>
