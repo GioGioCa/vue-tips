@@ -1,10 +1,7 @@
 <script setup lang="ts">
-//import HelloWorld from './components/HelloWorld.vue'
-//@ts-ignore
+
 import { ref } from 'vue';
 import tipPage from './components/tipPage.vue';
-//MUST BE CALL OTHERWISE, BC POLYMORPHISM
-// Theme state
 
 </script>
 

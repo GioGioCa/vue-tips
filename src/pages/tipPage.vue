@@ -134,8 +134,6 @@ async function initTransaction(amount: number) {
     idPayment: d.id,
   }));
 
-
-
     const transaccion: Transaction = {
       idTransaction: txRef.id,
       totalTips: amount,
@@ -151,7 +149,7 @@ async function initTransaction(amount: number) {
   });
 
   // Escuchar documento padre para `paidAmount`
- // Dentro de initTransaction, donde ya tienes:
+ // Dentro de initTransaction
   onSnapshot(txRef, (snap) => {
     const data = snap.data();
     paidAmount.value = data?.paid || 0;
@@ -255,7 +253,6 @@ async function resetTransaction() {
   }
 }
 
-
 // ——— Guardar pago con botón ———
 async function guardarPago() {
   if (!transactionId.value) {
@@ -294,16 +291,6 @@ async function guardarPago() {
   }
 }
 
-/* watch(paidAmount, (paid) => {
-  if (totalTips.value && paid >= totalTips.value) {
-    setTimeout(async () => {
-      const newId = await resetTransaction();
-      transactionId.value = newId;
-      totalTips.value = null;
-      isEditingTotal.value = true;
-    }, 5000);
-  }
-}); */
 async function handlePago() {
   // Si ya está pagado el total -> finalizar transacción
   if (totalTips.value && paidAmount.value >= totalTips.value) {
@@ -326,8 +313,7 @@ async function handlePago() {
   await guardarPago();
 }
 
-
-
+//Escuchar transacción (aun no es necesario)
 async function startListeningTo(txId: string) {
   if (stopTx) {
     stopTx();

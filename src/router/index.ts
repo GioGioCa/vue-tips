@@ -1,4 +1,3 @@
-// src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router';
 import Begin from '../pages/tipPage.vue';
 const routes = [
