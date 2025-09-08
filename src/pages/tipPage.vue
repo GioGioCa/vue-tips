@@ -76,12 +76,12 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-import Header from "./Header.vue";
-import DataInput from "./DataInput.vue";
-import InputPad from "./InputPad.vue";
-import PaymentsList from "./PaymentsList.vue";
-import PaymentDivided from "./PaymentDivided.vue";
-import PaymentMethodInput from "./PaymentMethodInput.vue";
+import Header from "../components/Header.vue";
+import DataInput from "../components/DataInput.vue";
+import InputPad from "../components/InputPad.vue";
+import PaymentsList from "../components/PaymentsList.vue";
+import PaymentDivided from "../components/PaymentDivided.vue";
+import PaymentMethodInput from "../components/PaymentMethodInput.vue";
 import { useTransaction } from "../composables/usePayments";
 
 // ——— Estado reactivo ———
